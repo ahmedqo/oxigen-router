@@ -28,6 +28,10 @@ const Route = Component({
                 () => {
                     var view = ``;
                     for (const node of this.childNodes) {
+                        if (node.tagName === "OXI-TITLE") {
+                            node.logic.call();
+                            continue;
+                        }
                         view = html ` ${view}${node.cloneNode(true)} `;
                     }
                     return view;
