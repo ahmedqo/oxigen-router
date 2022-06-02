@@ -1,6 +1,11 @@
 import exec from "oxigen-core/Maker/index.js";
 import html from "oxigen-core/Html/index.js";
 
+/**
+ * get the type of object
+ * @param {Any} o 
+ * @returns {String}
+ */
 function type(o) {
     return Object.prototype.toString.call(o).slice(8).slice(0, -1).toLowerCase();
 }
@@ -11,6 +16,11 @@ function Router() {
         _hash = null,
         _routes = [];
 
+    /**
+     * set the root element of the Router
+     * @param {Node|String} root 
+     * @returns {Router}
+     */
     function Router(root) {
         _root = (root instanceof Node) ? root : document.querySelector(root);
         Router.props.root = _root;
@@ -27,18 +37,40 @@ function Router() {
         }
     };
 
-    Router.change = function(change) {
-        _change = [..._change, change];
+    /**
+     * set change function(s) of the Router
+     * @param {Function(s)} change 
+     * @returns {Router}
+     */
+    Router.change = function(...change) {
+        _change = [..._change, ...change];
         return this;
     };
+
+    /**
+     * set load function of the Router
+     * @param {Function} load 
+     * @returns {Router}
+     */
     Router.load = function(load) {
         if (type(load) === "function") document.addEventListener("DOMContentLoaded", load);
         return this;
     };
+
+    /**
+     * set the hash prop of the Router
+     * @param {Boolean} hash 
+     * @returns {Router}
+     */
     Router.hash = function(hash) {
         _hash = type(hash) === "boolean" ? hash : true;
         return this;
     };
+
+    /**
+     * initilize the Router
+     * @returns {Router}
+     */
     Router.init = function() {
         var self = this;
         if (_hash && !location.hash) location.hash = "#/";
@@ -54,6 +86,14 @@ function Router() {
         else self.goto(location.pathname);
         return self;
     };
+
+    /**
+     * add new route to the Router
+     * @param {String} path 
+     * @param {String|Object|Node|Function|Promise} view 
+     * @param {String|Null} name 
+     * @returns {Router}
+     */
     Router.add = function(path, view, name) {
         const is = _routes.find(r => r.path === path);
         if (!is && type(path) === "string" && (["string", "object", "function", "asyncfunction"].includes(type(view)) || view instanceof Node)) {
@@ -66,6 +106,13 @@ function Router() {
         }
         return this;
     };
+
+    /**
+     * add scoped routes to the Router
+     * @param {String} path 
+     * @param {Function} fn 
+     * @returns {Router}
+     */
     Router.scope = function(path, fn) {
         var router = {
             routes: [],
@@ -93,6 +140,12 @@ function Router() {
         _routes = [..._routes, ...router.routes];
         return this;
     };
+
+    /**
+     * change the view according to provaded value
+     * @param {String} url 
+     * @returns {Router}
+     */
     Router.goto = function(url) {
         if (!history.state || history.state.path !== url) {
             history.pushState({
@@ -105,6 +158,13 @@ function Router() {
         _run();
         return this;
     };
+
+    /**
+     * make the url with params according to provided name
+     * @param {string} name 
+     * @param {Any} params
+     * @returns {String|Null}
+     */
     Router.url = function(name) {
         for (var _len = arguments.length, data = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
             data[_key - 1] = arguments[_key];
@@ -124,14 +184,31 @@ function Router() {
         }
         return null;
     };
+
+    /**
+     * get the prop value according to provided name
+     * @param {String} name 
+     * @returns {Any}
+     */
     Router.param = function(name) {
         if (this.props.log.current.params && this.props.log.current.params[name]) return this.props.log.current.params[name];
         return null;
     };
+
+    /**
+     * get the query value according to provided name
+     * @param {String} name 
+     * @returns {Any}
+     */
     Router.query = function(name) {
         if (this.props.log.current.queries && this.props.log.current.queries[name]) return this.props.log.current.queries[name];
         return null;
     };
+
+    /**
+     * clean up the Router
+     * @returns {Router}
+     */
     Router.clean = function() {
         Router.props.routes = _routes = [];
         Router.props.hash = _hash = null;
@@ -139,10 +216,19 @@ function Router() {
         return this;
     };
 
+    /**
+     * make the route regex
+     * @param {String} path 
+     * @returns {Regex}
+     */
     function _path(path) {
         return new RegExp("^" + path.replace(/\//g, "\\/").replace(/{\w+:\w+}/g, "(.+)") + "$");
     }
 
+    /**
+     * get the according route of the current link
+     * @returns {Route}
+     */
     function _match() {
         var url = (_hash ? location.hash.slice(1) : location.pathname) || "/";
         if (!_hash && !url.startsWith("/")) url = "/" + url;
@@ -166,6 +252,11 @@ function Router() {
         return match;
     }
 
+    /**
+     * make object of params from current link
+     * @param {Route} match 
+     * @returns {Object}
+     */
     function _params(match) {
         var values = match.result.slice(1);
         var keys = Array.from(match.route.path.matchAll(/{(\w+):/g)).map(function(result) {
@@ -203,6 +294,10 @@ function Router() {
         );
     }
 
+    /**
+     * make object of queries from current link
+     * @returns {Object}
+     */
     function _queries() {
         var params = new URLSearchParams(_hash ? (location.hash.split("?")[1] || "") : location.search);
         var obj = {};
@@ -212,6 +307,12 @@ function Router() {
         return obj;
     }
 
+    /**
+     * logs the current view data
+     * @param {Route} match 
+     * @param {Object} params 
+     * @param {Object} queries 
+     */
     function _logger(match, params, queries) {
         Router.props = {
             root: _root,
@@ -228,6 +329,12 @@ function Router() {
         };
     }
 
+    /**
+     * chnage view to the according route
+     * @param {String|Object|Node|Function|Promise} element 
+     * @param {Node} anchor 
+     * @param {Object} opts 
+     */
     async function _append(element, anchor, opts = {}) {
         switch (type(element)) {
             case "function":
@@ -251,6 +358,9 @@ function Router() {
         }
     }
 
+    /**
+     * execute the view change fns
+     */
     function _run() {
         var match = _match();
         var params = _params(match);
@@ -268,22 +378,44 @@ function Router() {
         });
     }
 
+    /**
+     * change the view according to provaded value
+     * @param {String} url 
+     */
     function redirect(url) {
         Router.goto(url)
     }
 
+    /**
+     * get object of queries from the current view
+     * @returns {Object}
+     */
     function queries() {
         return (Router.props.log && Router.props.log.current.queries) || {};
     }
 
+    /**
+     * get object of params from the current view
+     * @returns {Object}
+     */
     function params() {
         return (Router.props.log && Router.props.log.current.params) || {};
     }
 
+    /**
+     *  make the url with params according to provided name
+     * @param {String} name 
+     * @param  {...any} args 
+     * @returns {String}
+     */
     function urls(name, ...args) {
         return Router.url(name, ...args);
     }
 
+    /**
+     * get the logs
+     * @returns {Object}
+     */
     function logs() {
         return Router.props.log
     }
