@@ -10,6 +10,9 @@ const Route = Component({
         name: {
             type: "string",
         },
+        title: {
+            type: "string",
+        },
     },
     setup: {
         mounted() {
@@ -27,13 +30,9 @@ const Route = Component({
                 this.path,
                 () => {
                     var view = ``;
-                    for (const node of this.childNodes) {
-                        if (node.tagName === "OXI-TITLE") {
-                            node.logic.call();
-                            continue;
-                        }
+                    if (this.title) document.title = this.title
+                    for (const node of this.childNodes)
                         view = html ` ${view}${node.cloneNode(true)} `;
-                    }
                     return view;
                 },
                 this.name
