@@ -2,7 +2,7 @@ import Component, { html, sass, when } from "oxigen-core/index.js";
 import { redirect, logs } from "../core/index.js";
 
 const Link = Component({
-	taged: "oxi-link",
+	taged: "oxi-router-link",
 	props: {
 		path: {
 			type: "string",

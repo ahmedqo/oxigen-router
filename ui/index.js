@@ -4,4 +4,4 @@ import Route from "./Route.js";
 import View from "./View.js";
 import Link from "./Link.js";
 
-export { Switch, Scope, Route, View, Link }
+export { Switch, Scope, Route as Track, View as Outlet, Link }

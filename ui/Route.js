@@ -2,7 +2,7 @@ import Component, { html } from "oxigen-core/index.js";
 import Router from "../core/index.js";
 
 const Route = Component({
-    taged: "oxi-route",
+    taged: "oxi-router-track",
     props: {
         path: {
             type: "string",
@@ -17,7 +17,7 @@ const Route = Component({
     setup: {
         mounted() {
             const _root = this.parentElement;
-            const _el = ["OXI-SWITCH", "OXI-SCOPE"];
+            const _el = ["OXI-ROUTER-OUTLET", "OXI-ROUTER-SCOPE"];
             if (!_el.includes(_root.tagName)) {
                 throw Error("Route can only be used inside of " + _el);
             }
