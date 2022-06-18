@@ -1,7 +1,6 @@
-import Switch from "./Switch.js";
+import Outlet from "./Outlet.js";
 import Scope from "./Scope.js";
-import Route from "./Route.js";
-import View from "./View.js";
+import Track from "./Track.js";
 import Link from "./Link.js";
 
-export { Switch, Scope, Route as Track, View as Outlet, Link }
+export { Switch, Scope, Track, Outlet, Link }
