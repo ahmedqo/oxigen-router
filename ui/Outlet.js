@@ -4,6 +4,10 @@ import Router from "../core/index.js";
 const View = Component({
     taged: "oxi-router-outlet",
     props: {
+ 	hash: {
+            type: "boolean",
+            value: false,
+        },
         current: { type: "object" },
         params: { type: "object" },
         queries: { type: "object" },
