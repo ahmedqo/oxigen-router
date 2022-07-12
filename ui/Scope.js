@@ -6,11 +6,14 @@ const Scope = Component({
         path: {
             type: "string",
         },
+        guard: {
+            type: "function",
+        }
     },
     setup: {
         mounted() {
             const _root = this.parentElement;
-            const _el = ["OXI-ROUTER-OUTLET", "OXI-ROUTER-SCOPE", "OXI-ROUTER-TRACK"];
+            const _el = ["OXI-ROUTER-OUTLET", "OXI-ROUTER-SCOPE"];
             if (!_el.includes(_root.tagName)) {
                 throw Error("Scope can only be used inside of " + _el);
             }

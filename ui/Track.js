@@ -1,7 +1,7 @@
 import Component, { html } from "oxigen-core/index.js";
 import Router from "../core/index.js";
 
-const Route = Component({
+const Track = Component({
     taged: "oxi-router-track",
     props: {
         path: {
@@ -13,6 +13,9 @@ const Route = Component({
         title: {
             type: "string",
         },
+        guard: {
+            type: "function"
+        }
     },
     setup: {
         mounted() {
@@ -35,10 +38,11 @@ const Route = Component({
                         view = html ` ${view}${node.cloneNode(true)} `;
                     return view;
                 },
-                this.name
+                this.name,
+                this.guard
             );
         },
     },
 });
 
-export default Route;
+export default Track;

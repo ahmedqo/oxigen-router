@@ -1,24 +1,37 @@
 import Component, { html, sass } from "oxigen-core/index.js";
 import Router from "../core/index.js";
 
-const View = Component({
+const Outlet = Component({
     taged: "oxi-router-outlet",
     props: {
- 	hash: {
+        hash: {
             type: "boolean",
             value: false,
         },
-        current: { type: "object" },
-        params: { type: "object" },
-        queries: { type: "object" },
+        current: {
+            type: "object"
+        },
+        params: {
+            type: "object"
+        },
+        queries: {
+            type: "object"
+        },
+        prev: {
+            type: "array",
+        },
+        next: {
+            type: "array",
+        },
     },
     setup: {
         mounted() {
-            Router(this).change((route, params, queries) => {
+            Router(this).next((route, params, queries) => {
                     this.queries = queries;
                     this.params = params;
                     this.current = route;
-                })
+                }, ...this.next)
+                .prev(...this.prev)
                 .hash(this.hash)
                 .load(() => {
                     Router.init();
@@ -37,4 +50,4 @@ const View = Component({
     },
 });
 
-export default View;
+export default Outlet;

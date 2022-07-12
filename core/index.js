@@ -12,17 +12,18 @@ function type(o) {
 
 function Router() {
     var _root,
-        _change = [],
+        _prev = [],
+        _next = [],
         _hash = null,
         _routes = [];
 
     /**
      * set the root element of the Router
-     * @param {Node|String} root 
+     * @param {Node|String} root
      * @returns {Router}
      */
     function Router(root) {
-        _root = (root instanceof Node) ? root : document.querySelector(root);
+        _root = root instanceof Node ? root : document.querySelector(root);
         Router.props.root = _root;
         return Router;
     }
@@ -34,22 +35,32 @@ function Router() {
         log: {
             previous: {},
             current: {},
-        }
+        },
     };
 
     /**
-     * set change function(s) of the Router
-     * @param {Function(s)} change 
+     * set prev function(s) of the Router
+     * @param {Function(s)} prev
      * @returns {Router}
      */
-    Router.change = function(...change) {
-        _change = [..._change, ...change];
+    Router.prev = function(...prev) {
+        _prev = [..._prev, ...prev];
+        return this;
+    };
+
+    /**
+     * set next function(s) of the Router
+     * @param {Function(s)} next
+     * @returns {Router}
+     */
+    Router.next = function(...next) {
+        _next = [..._next, ...next];
         return this;
     };
 
     /**
      * set load function of the Router
-     * @param {Function} load 
+     * @param {Function} load
      * @returns {Router}
      */
     Router.load = function(load) {
@@ -59,7 +70,7 @@ function Router() {
 
     /**
      * set the hash prop of the Router
-     * @param {Boolean} hash 
+     * @param {Boolean} hash
      * @returns {Router}
      */
     Router.hash = function(hash) {
@@ -89,35 +100,36 @@ function Router() {
 
     /**
      * add new route to the Router
-     * @param {String} path 
-     * @param {String|Object|Node|Function|Promise} view 
-     * @param {String|Null} name 
+     * @param {String} path
+     * @param {String|Object|Node|Function|Promise} view
+     * @param {String|Null} name
      * @returns {Router}
      */
-    Router.add = function(path, view, name) {
-        const is = _routes.find(r => r.path === path);
+    Router.add = function(path, view, name, guard = () => true) {
+        const is = _routes.find((r) => r.path === path);
         if (!is && type(path) === "string" && (["string", "object", "function", "asyncfunction"].includes(type(view)) || view instanceof Node)) {
-            path = (path.endsWith("/") && path.length > 1) ? path.substr(0, path.length - 1) : path;
-            _routes.push({ path: path, view: view, name: name });
+            path = path.endsWith("/") && path.length > 1 ? path.substr(0, path.length - 1) : path;
+            _routes.push({ path: path, view: view, name: name, guard: guard });
             this.props = {
                 ...this.props,
-                routes: _routes
-            }
+                routes: _routes,
+            };
         }
         return this;
     };
 
     /**
      * add scoped routes to the Router
-     * @param {String} path 
-     * @param {Function} fn 
+     * @param {String} path
+     * @param {Function} fn
      * @returns {Router}
      */
-    Router.scope = function(path, fn) {
+    Router.scope = function(path, fn, guard = () => true) {
         var router = {
             routes: [],
             prepath: [path],
-            add: function(path, view, name) {
+            guard: guard,
+            add: function(path, view, name, _guard) {
                 if (type(path) === "string" && (["string", "object", "function", "asyncfunction"].includes(type(view)) || view instanceof HTMLElement)) {
                     path = !path || path == "*" ? "/404" : path;
                     path = path.startsWith("/") ? path : "/" + path;
@@ -125,13 +137,15 @@ function Router() {
                     this.routes.push({
                         view: view,
                         name: name,
+                        guard: _guard ? _guard : this.guard,
                         path: this.prepath.join("") + path,
                     });
                 }
                 return this;
             },
-            scope: function(path, fn) {
+            scope: function(path, fn, guard = () => true) {
                 this.prepath.push(path);
+                this.guard = guard;
                 fn.call(this);
                 return this;
             },
@@ -143,7 +157,7 @@ function Router() {
 
     /**
      * change the view according to provaded value
-     * @param {String} url 
+     * @param {String} url
      * @returns {Router}
      */
     Router.goto = function(url) {
@@ -161,7 +175,7 @@ function Router() {
 
     /**
      * make the url with params according to provided name
-     * @param {string} name 
+     * @param {string} name
      * @param {Any} params
      * @returns {String|Null}
      */
@@ -187,7 +201,7 @@ function Router() {
 
     /**
      * get the prop value according to provided name
-     * @param {String} name 
+     * @param {String} name
      * @returns {Any}
      */
     Router.param = function(name) {
@@ -197,7 +211,7 @@ function Router() {
 
     /**
      * get the query value according to provided name
-     * @param {String} name 
+     * @param {String} name
      * @returns {Any}
      */
     Router.query = function(name) {
@@ -218,7 +232,7 @@ function Router() {
 
     /**
      * make the route regex
-     * @param {String} path 
+     * @param {String} path
      * @returns {Regex}
      */
     function _path(path) {
@@ -254,7 +268,7 @@ function Router() {
 
     /**
      * make object of params from current link
-     * @param {Route} match 
+     * @param {Route} match
      * @returns {Object}
      */
     function _params(match) {
@@ -299,7 +313,7 @@ function Router() {
      * @returns {Object}
      */
     function _queries() {
-        var params = new URLSearchParams(_hash ? (location.hash.split("?")[1] || "") : location.search);
+        var params = new URLSearchParams(_hash ? location.hash.split("?")[1] || "" : location.search);
         var obj = {};
         new Set([...params.keys()]).forEach((key) => {
             obj[key] = params.getAll(key).length > 1 ? params.getAll(key) : params.get(key);
@@ -309,9 +323,9 @@ function Router() {
 
     /**
      * logs the current view data
-     * @param {Route} match 
-     * @param {Object} params 
-     * @param {Object} queries 
+     * @param {Route} match
+     * @param {Object} params
+     * @param {Object} queries
      */
     function _logger(match, params, queries) {
         Router.props = {
@@ -325,17 +339,18 @@ function Router() {
                     params: params,
                     queries: queries,
                 },
-            }
+            },
         };
     }
 
     /**
      * chnage view to the according route
-     * @param {String|Object|Node|Function|Promise} element 
-     * @param {Node} anchor 
-     * @param {Object} opts 
+     * @param {String|Object|Node|Function|Promise} element
+     * @param {Node} anchor
+     * @param {Object} opts
      */
     async function _append(element, anchor, opts = {}) {
+        opts = { route: {}, params: {}, queries: {}, ...opts };
         switch (type(element)) {
             case "function":
             case "asyncfunction":
@@ -353,7 +368,7 @@ function Router() {
         const events = element.events;
         const props = element.props;
         exec(anchor, temp, props, events, components);
-        for (const fn of _change) {
+        for (const fn of _next) {
             if (type(fn) === "function") fn(opts.route, opts.params, opts.queries);
         }
     }
@@ -361,29 +376,40 @@ function Router() {
     /**
      * execute the view change fns
      */
-    function _run() {
+    async function _run() {
         var match = _match();
-        var params = _params(match);
-        var queries = _queries();
         var route = {
             path: match.route.path,
             name: match.route.name,
             input: match.result[0],
         };
-        _logger(route, params, queries);
-        _append(match.route.view, _root, {
-            route,
-            params,
-            queries,
-        });
+        var $ = (view) => {
+            _append(view, _root, {
+                route,
+            });
+        };
+        for (const fn of _prev) {
+            if (type(fn) === "function") fn(route, $);
+        }
+        const guard = match.route.guard;
+        if (typeof guard === "function" && (await guard()) === true) {
+            var params = _params(match);
+            var queries = _queries();
+            _logger(route, params, queries);
+            _append(match.route.view, _root, {
+                route,
+                params,
+                queries,
+            });
+        }
     }
 
     /**
      * change the view according to provaded value
-     * @param {String} url 
+     * @param {String} url
      */
     function redirect(url) {
-        Router.goto(url)
+        Router.goto(url);
     }
 
     /**
@@ -404,8 +430,8 @@ function Router() {
 
     /**
      *  make the url with params according to provided name
-     * @param {String} name 
-     * @param  {...any} args 
+     * @param {String} name
+     * @param  {...any} args
      * @returns {String}
      */
     function urls(name, ...args) {
@@ -417,7 +443,7 @@ function Router() {
      * @returns {Object}
      */
     function logs() {
-        return Router.props.log
+        return Router.props.log;
     }
 
     return {
@@ -433,4 +459,4 @@ function Router() {
 const { redirect, queries, params, urls, logs, Router: router } = Router();
 
 export default router;
-export { redirect, queries, params, urls, logs };
+export { Router as Private, redirect, queries, params, urls, logs };
