@@ -11,7 +11,7 @@ function type(o) {
 }
 
 function Router() {
-    var _root,
+    var _root, _loader,
         _prev = [],
         _next = [],
         _hash = null,
@@ -30,6 +30,7 @@ function Router() {
 
     Router.props = {
         root: undefined,
+        loader: undefined,
         hash: null,
         routes: [],
         log: {
@@ -75,6 +76,16 @@ function Router() {
      */
     Router.hash = function(hash) {
         _hash = type(hash) === "boolean" ? hash : true;
+        return this;
+    };
+
+    /**
+     * set the loader prop of the Router
+     * @param {Any} loader
+     * @returns {Router}
+     */
+    Router.loader = function(loader) {
+        _loader = loader;
         return this;
     };
 
@@ -332,6 +343,7 @@ function Router() {
             root: _root,
             routes: _routes,
             hash: _hash,
+            loader: _loader,
             log: {
                 previous: Router.props.log.current,
                 current: {
@@ -388,6 +400,11 @@ function Router() {
                 route,
             });
         };
+        if (_loader) {
+            _append(_loader, _root, {
+                route,
+            });
+        }
         for (const fn of _prev) {
             if (type(fn) === "function") fn(route, $);
         }
