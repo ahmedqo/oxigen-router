@@ -36,7 +36,7 @@ const Link = Component({
 	},
 	styles() {
 		return sass`
-            :host {
+            :host, :host * {
                 display: inline-block;
                 font-size: 16px;
                 font-weight: 600;
@@ -44,9 +44,11 @@ const Link = Component({
 					this.attrs.active,
 					` 
                         color: #ff0057;
+			fill: #ff0057;
                     `,
 					`
                         color: #2e3eff;
+			fill: #2e3eff;
                     `
 				)}
                 &(:hover) {
