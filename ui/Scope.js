@@ -8,6 +8,7 @@ const Scope = Component({
         },
         guard: {
             type: "function",
+            value: () => true,
         }
     },
     setup: {

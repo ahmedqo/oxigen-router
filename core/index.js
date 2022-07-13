@@ -392,7 +392,7 @@ function Router() {
             if (type(fn) === "function") fn(route, $);
         }
         const guard = match.route.guard;
-        if (typeof guard === "function" && (await guard()) === true) {
+        if (type(guard) === "function" && (await guard()) === true) {
             var params = _params(match);
             var queries = _queries();
             _logger(route, params, queries);

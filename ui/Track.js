@@ -14,7 +14,8 @@ const Track = Component({
             type: "string",
         },
         guard: {
-            type: "function"
+            type: "function",
+            value: () => true,
         }
     },
     setup: {
