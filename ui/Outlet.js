@@ -40,13 +40,10 @@ const Outlet = Component({
     },
     styles() {
         return sass `
-            :host {
+            @self {
                 display: block;
             }
         `;
-    },
-    render() {
-        return html `<slot />`;
     },
 });
 

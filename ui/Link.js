@@ -36,7 +36,7 @@ const Link = Component({
 	},
 	styles() {
 		return sass`
-            :host, :host * {
+            @self, @self * {
                 display: inline-block;
                 font-size: 16px;
                 font-weight: 600;
@@ -51,7 +51,7 @@ const Link = Component({
 						fill: #2e3eff;
                     `
 				)}
-                &(:hover) {
+                &:hover {
                     cursor: pointer;
                     text-decoration: underline;
                 }
