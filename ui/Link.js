@@ -17,7 +17,7 @@ const Link = Component({
 	setup: {
 		mounted() {
 			this.addEventListener("click", (e) => {
-				document.querySelectorAll("oxi-link").forEach((e) => {
+				document.querySelectorAll("oxi-router-link").forEach((e) => {
 					e.attrs.active = false;
 				});
 				this.attrs.active = true;
@@ -44,11 +44,11 @@ const Link = Component({
 					this.attrs.active,
 					` 
                         color: #ff0057;
-			fill: #ff0057;
+						fill: #ff0057;
                     `,
 					`
                         color: #2e3eff;
-			fill: #2e3eff;
+						fill: #2e3eff;
                     `
 				)}
                 &(:hover) {

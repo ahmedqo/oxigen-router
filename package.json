@@ -14,7 +14,5 @@
         "url": "https://github.com/ahmedqo/oxigen-router/issues"
     },
     "homepage": "https://github.com/ahmedqo/oxigen-router#readme",
-    "dependencies": {
-        "oxigen-core": "^1.0.0"
-    }
+    "dependencies": {}
 }
