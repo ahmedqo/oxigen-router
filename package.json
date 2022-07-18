@@ -1,6 +1,6 @@
 {
     "name": "oxigen-router",
-    "version": "1.0.11",
+    "version": "1.0.10",
     "description": "router for oxigen framework",
     "main": "index.js",
     "type": "module",
